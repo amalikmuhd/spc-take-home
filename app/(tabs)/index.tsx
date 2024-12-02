@@ -1,74 +1,120 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, View, ScrollView } from "react-native";
+import TabNavigationHeader from "@/components/TabNavigationHeader";
+import { HStack } from "@/components/HStack";
+import SearchInput from "@/components/SearchInput";
+import AddressInput from "@/components/AddressInput";
+import CurrentLocation from "@/components/CurrentLocation";
+import AdsCard from "@/components/AdsCard";
+import IconButton from "@/components/IconButton";
+import { categoriesOne, categoriesTwo, dummyData, buttons } from "@/constants/Data";
+import Card from "@/components/Card";
+import { VStack } from "@/components/VStack";
+import CustomButton from "@/components/CustomButton";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Item } from "@/types";
+import Label from "@/components/Label";
+import Screen from "@/components/Screen";
+import ViewAnimation from "@/components/ViewAnimation";
+import { useBookmarks } from "@/context/bookmark";
 
 export default function HomeScreen() {
+  const [level, setLevel] = useState(0);
+  const { toggleBookmark, isBookmarked } = useBookmarks();
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <Screen>
+      <ViewAnimation delay={300}>
+        <TabNavigationHeader />
+      </ViewAnimation>
+      <ViewAnimation delay={350}>
+        <SearchInput />
+      </ViewAnimation>
+      <ViewAnimation delay={400}>
+        <HStack mt={10} gap={12}>
+          <AddressInput />
+          <CurrentLocation />
+        </HStack>
+      </ViewAnimation>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ViewAnimation delay={450}>
+          <Label leftTitle="  Special Offers" rightTitle="See All" />
+        </ViewAnimation>
+        <ViewAnimation>
+          <AdsCard />
+        </ViewAnimation>
+        <ViewAnimation delay={500}>
+          <Label leftTitle="Categories" rightTitle="See All" />
+        </ViewAnimation>
+
+        <ViewAnimation delay={550}>
+          <View style={{ ...styles.grid, marginTop: 18 }}>
+            {categoriesOne.map((item, index) => (
+              <IconButton key={index} source={item.iconName} label={item.label} />
+            ))}
+          </View>
+        </ViewAnimation>
+        <ViewAnimation delay={600}>
+          <View style={{ ...styles.grid, marginTop: 24 }}>
+            {categoriesTwo.map((item, index) => (
+              <IconButton key={index} source={item.iconName} label={item.label} />
+            ))}
+          </View>
+        </ViewAnimation>
+
+        <ViewAnimation delay={650}>
+          <Label leftTitle="Recommended services" rightTitle="See All" mb={10} />
+          <VStack bg={"#FEFEFE"}>
+            {dummyData.map((item, index) => (
+              <Card
+                mt={10}
+                key={index}
+                name={item.name}
+                title={item.title}
+                amount={item.amount}
+                starRate={item.starRate}
+                reviews={item.reviews}
+                toggle={isBookmarked(item) ? true : false}
+                onPress={() => toggleBookmark(item)}
+              />
+            ))}
+          </VStack>
+        </ViewAnimation>
+
+        <ViewAnimation delay={700}>
+          <Label leftTitle="Discover & Explore Services" rightTitle="See All" />
+          <VStack bg={"#FEFEFE"}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <HStack gap={10} mt={18} mb={20}>
+                {buttons.map((title, index) => (
+                  <CustomButton key={index} title={title} toggle={level === index} onPress={() => setLevel(index)} />
+                ))}
+              </HStack>
+            </ScrollView>
+            {dummyData.map((item, index) => (
+              <Card
+                mt={10}
+                key={index}
+                name={item.name}
+                title={item.title}
+                amount={item.amount}
+                starRate={item.starRate}
+                reviews={item.reviews}
+                toggle={isBookmarked(item) ? true : false}
+                onPress={() => toggleBookmark(item)}
+              />
+            ))}
+          </VStack>
+        </ViewAnimation>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  grid: {
+    flexDirection: "row",
+    // flexWrap: "wrap",
+    justifyContent: "space-between",
   },
 });
